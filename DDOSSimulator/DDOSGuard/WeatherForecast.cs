@@ -1,4 +1,4 @@
-namespace Server
+namespace DDOSGuardService
 {
     public class WeatherForecast
     {
