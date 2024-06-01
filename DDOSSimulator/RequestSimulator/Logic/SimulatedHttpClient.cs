@@ -3,7 +3,7 @@ using System.Net;
 
 namespace RequestSimulatorClient.Logic
 {
-    public class SimulatedHttpClient(IInputOutput io, HttpClient httpClient, Random random, Tuple<int, int> waitRangeMS, string serverUrl)
+    public class SimulatedHttpClient(IInputOutput io, HttpClient httpClient, Random random, Tuple<int, int> waitRangeMS, string serverUrl) : ISimulation
     {
         #region Constants
 
@@ -26,11 +26,11 @@ namespace RequestSimulatorClient.Logic
 
         #region Public Methods
 
-        public Task Simulate()
+        public void Simulate(CancellationToken token)
         {
-            _io.Write($"Client {_id} started simulation\n");
+            _io.Write($"Client {_id} started simulation");
 
-            while (true)
+            while (!token.IsCancellationRequested)
             {
                 SimulateRequest();
                 WaitRandomTime();
