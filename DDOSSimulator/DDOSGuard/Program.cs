@@ -1,25 +1,21 @@
-var builder = WebApplication.CreateBuilder(args);
+using DDOSGuardService.Startup;
 
-// Add services to the container.
+ThreadPool.SetMinThreads(Environment.ProcessorCount, Environment.ProcessorCount);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var startupConfiguration = new AppStartupConfiguration();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+startupConfiguration.ConfigureServices(builder.Services);
+
+
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+startupConfiguration.ConfigureApp(app);
 
-app.UseHttpsRedirection();
+await app.StartAsync();
 
-app.UseAuthorization();
+Console.WriteLine("Press Enter to stop the application...");
+Console.ReadLine();
 
-app.MapControllers();
-
-app.Run();
+await app.StopAsync();
