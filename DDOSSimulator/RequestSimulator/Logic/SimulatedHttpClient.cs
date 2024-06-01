@@ -4,7 +4,7 @@ using System.Web;
 
 namespace RequestSimulatorClient.Logic
 {
-    public class SimulatedHttpClient(IInputOutput io, HttpClient httpClient, Random random, Tuple<int, int> waitRangeMS, string serverUrl) : ISimulation
+    public class SimulatedHttpClient(IInputOutput io, HttpClient httpClient, Random random, Tuple<int, int> waitRangeMS, string serverUrl, string id) : ISimulation
     {
         #region Constants
 
@@ -20,8 +20,7 @@ namespace RequestSimulatorClient.Logic
         private readonly Random _random = random;
         private readonly Tuple<int, int> waitRangeMS = waitRangeMS;
         private readonly string _serverUrl = serverUrl;
-
-        private readonly string _id = Guid.NewGuid().ToString();
+        private readonly string _id = id;
 
         #endregion
 

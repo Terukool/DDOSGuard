@@ -3,14 +3,13 @@ using DDOSGuardService.Properties;
 
 namespace DDOSGuardService.Logic
 {
-    public class RequestRateLimiter(RecentRequestsCache cache, RateLimiterSettings settings) : IRateLimiter
+    public class RequestRateLimiter(RequestWindowCache cache, RateLimiterSettings settings) : IRateLimiter
     {
         #region Fields
 
-        private readonly RecentRequestsCache _cache = cache;
+        private readonly RequestWindowCache _cache = cache;
         private readonly int _maxRequestsPerTimeFrame = settings.MaxRequestsPerTimeFrame;
         private readonly double _timeFrameInSeconds = settings.TimeFrameInSeconds;
-
 
         #endregion
 
@@ -19,12 +18,11 @@ namespace DDOSGuardService.Logic
         public bool ShouldBlock(string id)
         {
             var requestTimestamp = DateTime.UtcNow;
-            var recentRequests = _cache[id].Timestamps.ToList();
-            var shouldBlock = DoRequestsExceedLimit(recentRequests, requestTimestamp);
+            var shouldBlock = DoesRequestExceedLimit(id);
 
             if (!shouldBlock)
             {
-                _cache.Add(id, requestTimestamp);
+                UpdateWindowCache(id, requestTimestamp);
             }
 
             return shouldBlock;
@@ -34,17 +32,33 @@ namespace DDOSGuardService.Logic
 
         #region Private Methods
 
-        public bool DoRequestsExceedLimit(IList<DateTime> timestamps, DateTime newTimestamp)
+        private bool DoesRequestExceedLimit(string windowId)
         {
-            if (timestamps.Count < _maxRequestsPerTimeFrame)
+            var windowState = _cache[windowId];
+
+            return windowState.Count >= _maxRequestsPerTimeFrame;
+        }
+
+        private void UpdateWindowCache(string windowId, DateTime newRequestTimestamp)
+        {
+            if (ShouldStartNewWindow(windowId, newRequestTimestamp))
+            {
+                _cache.ResetWindow(windowId, newRequestTimestamp);
+            }
+
+            _cache.CacheRequest(windowId);
+        }
+
+        private bool ShouldStartNewWindow(string windowId, DateTime newRequestTimestamp)
+        {
+            if (_cache.DoesExpire)
             {
                 return false;
             }
 
-            var timeFrameStart = newTimestamp.AddSeconds(-_timeFrameInSeconds);
-            var requestsInTimeFrame = timestamps.Where(timestamp => timestamp >= timeFrameStart);
+            var windowState = _cache[windowId];
 
-            return requestsInTimeFrame.Count() >= _maxRequestsPerTimeFrame;
+            return newRequestTimestamp - windowState.StartTimestamp >= TimeSpan.FromSeconds(_timeFrameInSeconds);
         }
 
         #endregion

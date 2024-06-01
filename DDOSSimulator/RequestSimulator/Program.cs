@@ -23,7 +23,7 @@ if (!didParseSucceed || numberOfClients <= 0)
     return;
 }
 
-var spawnClient = new Func<ISimulation>(() => new SimulatedHttpClient(io, httpClient, random, waitRangeMs, SERVER_URL));
+var spawnClient = new Func<string, ISimulation>((id) => new SimulatedHttpClient(io, httpClient, random, waitRangeMs, SERVER_URL, id));
 var simulation = new SimulationComposite(numberOfClients, spawnClient);
 
 simulation.Simulate(cancellationTokenSource.Token);

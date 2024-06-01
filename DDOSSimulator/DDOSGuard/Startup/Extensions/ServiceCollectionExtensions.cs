@@ -12,7 +12,7 @@ namespace DDOSGuardService.Startup.Extensions
         {
             services.AddSingleton<RequestRateLimiterMiddleware>();
             services.AddSingleton<HttpExceptionMiddleware>();
-            services.AddSingleton<RecentRequestsCache, InMemoryRecentRequestCache>();
+            services.AddSingleton<RequestWindowCache, InMemoryRequestWindowCache>();
 
             services.AddTransient<IRateLimiter, RequestRateLimiter>();
         }

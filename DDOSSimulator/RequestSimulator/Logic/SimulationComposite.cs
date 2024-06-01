@@ -2,11 +2,11 @@
 
 namespace RequestSimulatorClient.Logic
 {
-    class SimulationComposite(int numberOfSimulations, Func<ISimulation> spawnSimulation) : ISimulation
+    class SimulationComposite(int numberOfSimulations, Func<string, ISimulation> spawnSimulation) : ISimulation
     {
         #region Fields
 
-        private readonly Func<ISimulation> _spawnSimulation = spawnSimulation;
+        private readonly Func<string, ISimulation> _spawnSimulation = spawnSimulation;
         private readonly int _numberOfSimulations = numberOfSimulations;
 
         #endregion
@@ -15,7 +15,7 @@ namespace RequestSimulatorClient.Logic
 
         public void Simulate(CancellationToken token)
         {
-            var clients = Enumerable.Range(0, _numberOfSimulations).Select(_ => _spawnSimulation());
+            var clients = Enumerable.Range(0, _numberOfSimulations).Select(id => _spawnSimulation(id.ToString()));
             var threads = clients.Select(client => SpawnSimulationThread(client, token));
 
             threads.ToList().ForEach(thread => thread.Start());
