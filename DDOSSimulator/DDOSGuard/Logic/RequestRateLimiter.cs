@@ -22,7 +22,10 @@ namespace DDOSGuardService.Logic
             var recentRequests = _cache[id].Timestamps;
             var shouldBlock = DoRequestsExceedLimit(recentRequests, requestTimestamp);
 
-            _cache.Add(id, requestTimestamp);
+            if (!shouldBlock)
+            {
+                _cache.Add(id, requestTimestamp);
+            }
 
             return shouldBlock;
         }
