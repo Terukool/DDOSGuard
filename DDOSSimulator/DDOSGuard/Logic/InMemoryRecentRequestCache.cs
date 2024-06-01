@@ -10,7 +10,7 @@ namespace DDOSGuardService.Logic
 
         private readonly MemoryCache _cache = new(new MemoryCacheOptions
         {
-            SizeLimit = 100000
+            SizeLimit = rateLimiterSettings.CacheSize
         });
         private readonly MemoryCacheEntryOptions _cacheEntryOptions = new ()
         {
