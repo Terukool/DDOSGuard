@@ -1,4 +1,5 @@
 ﻿using DDOSGuardService.Logic.Interfaces;
+using DDOSGuardService.Models;
 using DDOSGuardService.Properties;
 
 namespace DDOSGuardService.Logic
@@ -17,12 +18,19 @@ namespace DDOSGuardService.Logic
 
         public bool ShouldBlock(string id)
         {
-            var requestTimestamp = DateTime.UtcNow;
+            var requestTimestamp = DateTime.Now;
+            var shouldStartNewWindow = ShouldStartNewWindow(id, requestTimestamp);
+
+            if (shouldStartNewWindow)
+            {
+                _cache.ResetWindow(id, requestTimestamp);
+            }
+
             var shouldBlock = DoesRequestExceedLimit(id);
 
             if (!shouldBlock)
             {
-                UpdateWindowCache(id, requestTimestamp);
+                _cache.CacheRequest(id);
             }
 
             return shouldBlock;
@@ -32,23 +40,6 @@ namespace DDOSGuardService.Logic
 
         #region Private Methods
 
-        private bool DoesRequestExceedLimit(string windowId)
-        {
-            var windowState = _cache[windowId];
-
-            return windowState.Count >= _maxRequestsPerTimeFrame;
-        }
-
-        private void UpdateWindowCache(string windowId, DateTime newRequestTimestamp)
-        {
-            if (ShouldStartNewWindow(windowId, newRequestTimestamp))
-            {
-                _cache.ResetWindow(windowId, newRequestTimestamp);
-            }
-
-            _cache.CacheRequest(windowId);
-        }
-
         private bool ShouldStartNewWindow(string windowId, DateTime newRequestTimestamp)
         {
             if (_cache.DoesExpire)
@@ -57,9 +48,24 @@ namespace DDOSGuardService.Logic
             }
 
             var windowState = _cache[windowId];
-            var hasWindowExpired = newRequestTimestamp - windowState.StartTimestamp >= TimeSpan.FromSeconds(_timeFrameInSeconds);
+            var hasWindowExpired = HasTimeframePassed(newRequestTimestamp, windowState);
 
             return hasWindowExpired;
+        }
+
+        private bool DoesRequestExceedLimit(string windowId)
+        {
+            var windowState = _cache[windowId];
+
+            return windowState.Count >= _maxRequestsPerTimeFrame;
+        }
+
+        private bool HasTimeframePassed(DateTime newRequestTimestamp, RequestWindowState windowState)
+        {
+            var timeSinceStart = newRequestTimestamp - windowState.StartTimestamp;
+            var timeframe = TimeSpan.FromSeconds(_timeFrameInSeconds);
+
+            return timeSinceStart >= timeframe;
         }
 
         #endregion
