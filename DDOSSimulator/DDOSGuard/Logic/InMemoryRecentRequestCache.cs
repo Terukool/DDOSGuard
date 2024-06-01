@@ -1,6 +1,6 @@
 ﻿using DDOSGuardService.Models;
 using DDOSGuardService.Properties;
-using System.Collections.Concurrent;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DDOSGuardService.Logic
 {
@@ -8,7 +8,16 @@ namespace DDOSGuardService.Logic
     {
         #region Fields
 
-        private readonly ConcurrentDictionary<string, RequestState> _cache = new();
+        private readonly MemoryCache _cache = new(new MemoryCacheOptions
+        {
+            SizeLimit = 100000
+        });
+        private readonly MemoryCacheEntryOptions _cacheEntryOptions = new ()
+        {
+            SlidingExpiration = TimeSpan.FromSeconds(rateLimiterSettings.TimeFrameInSeconds),
+            Size = 1,
+            Priority = CacheItemPriority.High
+        };
 
         #endregion
 
@@ -16,8 +25,13 @@ namespace DDOSGuardService.Logic
 
         public override RequestState this[string id]
         {
-            get => _cache.GetOrAdd(id, _ => new RequestState());
-            protected set => _cache[id] = value;
+            get
+            {
+                _cache.TryGetValue(id, out RequestState? requestState);
+
+                return requestState ?? new RequestState();
+            }
+            protected set => _cache.Set(id, value, _cacheEntryOptions);
         }
 
         #endregion

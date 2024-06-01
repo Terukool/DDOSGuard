@@ -4,6 +4,7 @@
     {
         public const string Key = "RateLimiter";
 
+        public int CacheSize { get; set; }
         public int MaxRequestsPerTimeFrame { get; set; }
         public double TimeFrameInSeconds { get; set; }
         public string ClientQueryKey { get; set; } = string.Empty;

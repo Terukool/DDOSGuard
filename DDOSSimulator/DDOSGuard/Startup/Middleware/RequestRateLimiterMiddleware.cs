@@ -20,7 +20,10 @@ namespace DDOSGuardService.Startup.Middleware
         {
             string? clientId = context.Request.Query[_clientIdKey];
 
-            ArgumentNullException.ThrowIfNull(clientId);
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new ClientIdRequiredException();
+            }
 
             ProcessRequest(clientId);
 

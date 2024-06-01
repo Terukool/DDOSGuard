@@ -10,21 +10,16 @@ namespace DDOSGuardService.Startup.Extensions
     {
         public static void ConfigureDependencyInjection(this IServiceCollection services)
         {
+            services.AddSingleton<RequestRateLimiterMiddleware>();
+            services.AddSingleton<HttpExceptionMiddleware>();
             services.AddSingleton<RecentRequestsCache, InMemoryRecentRequestCache>();
 
             services.AddTransient<IRateLimiter, RequestRateLimiter>();
-            services.AddTransient<RequestRateLimiterMiddleware>();
-            services.AddTransient<HttpExceptionMiddleware>();
         }
 
-        public static void ConfigureSettings(this IServiceCollection services, string settingsPath)
+        public static void ConfigureSettings(this IServiceCollection services, IConfiguration configuration)
         {
-            var Configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(settingsPath, optional: false, reloadOnChange: true)
-                .Build();
-
-            services.Configure<RateLimiterSettings>(Configuration.GetSection(RateLimiterSettings.Key));
+            services.Configure<RateLimiterSettings>(configuration.GetSection(RateLimiterSettings.Key));
 
             services.AddSingleton(_ => _.GetRequiredService<IOptions<RateLimiterSettings>>().Value);
         }

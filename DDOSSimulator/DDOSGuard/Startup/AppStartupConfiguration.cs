@@ -5,15 +5,13 @@ namespace DDOSGuardService.Startup
 {
     public class AppStartupConfiguration
     {
-        const string SETTINGS_FILE = "appsettings.json";
-
         #region Public Methods
 
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers();
             services.ConfigureDependencyInjection();
-            services.ConfigureSettings(SETTINGS_FILE);
+            services.ConfigureSettings(configuration);
             services.ConfigureSwagger();
         }
 

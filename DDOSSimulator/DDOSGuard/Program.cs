@@ -4,10 +4,7 @@ ThreadPool.SetMinThreads(Environment.ProcessorCount, Environment.ProcessorCount)
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 var startupConfiguration = new AppStartupConfiguration();
 
-startupConfiguration.ConfigureServices(builder.Services);
-
-
-
+startupConfiguration.ConfigureServices(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
