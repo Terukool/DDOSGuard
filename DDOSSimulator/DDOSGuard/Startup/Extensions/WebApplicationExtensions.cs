@@ -1,4 +1,6 @@
-﻿namespace DDOSGuardService.Startup.Extensions
+﻿using DDOSGuardService.Startup.Middleware;
+
+namespace DDOSGuardService.Startup.Extensions
 {
     public static class WebApplicationExtensions
     {
@@ -13,5 +15,14 @@
             app.UseSwaggerUI();
         }
 
+        public static void UseHttpExceptionMiddleware(this WebApplication app)
+        {
+            app.UseMiddleware<HttpExceptionMiddleware>();
+        }
+
+        public static void UseRateLimiting(this WebApplication app)
+        {
+            app.UseMiddleware<RequestRateLimiterMiddleware>();
+        }
     }
 }

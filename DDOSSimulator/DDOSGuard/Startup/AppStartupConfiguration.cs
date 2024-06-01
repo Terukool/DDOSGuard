@@ -18,8 +18,8 @@ namespace DDOSGuardService.Startup
         public void ConfigureApp(WebApplication app)
         {
             app.ConfigureSwagger();
-            app.UseMiddleware<HttpExceptionMiddleware>();
-            app.UseMiddleware<RequestRateLimiterMiddleware>();
+            app.UseHttpExceptionMiddleware();
+            app.UseRateLimiting();
             app.MapControllers();
         }
 
