@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace DDOSGuardService.Logic
 {
-    public class InMemoryRequestWindowCache(RateLimiterSettings rateLimiterSettings) : RequestWindowCache()
+    public class InMemoryRequestWindowCache(RateLimiterSettings rateLimiterSettings) : RequestWindowCache(rateLimiterSettings.TimeFrameInSeconds)
     {
         #region Constants
 
@@ -19,7 +19,6 @@ namespace DDOSGuardService.Logic
         {
             SizeLimit = rateLimiterSettings.CacheSize
         });
-        private readonly double _timeFrameInSeconds = rateLimiterSettings.TimeFrameInSeconds;
 
         #endregion
 
@@ -33,7 +32,7 @@ namespace DDOSGuardService.Logic
             {
                 _cache.TryGetValue(id, out RequestWindowState? requestState);
 
-                return requestState ?? new RequestWindowState();
+                return requestState ?? new RequestWindowState(_timeFrameInSeconds);
             }
             protected set 
             {
@@ -49,12 +48,11 @@ namespace DDOSGuardService.Logic
 
         private MemoryCacheEntryOptions GetMemoryCacheEntryOptions(RequestWindowState currentState)
         {
-            var endOfCurrentWindow = currentState.StartTimestamp.AddSeconds(_timeFrameInSeconds);
             var cacheEntryOptions = new MemoryCacheEntryOptions
             {
                 Size = CACHE_ITEM_SIZE,
                 Priority = CACHE_ITEM_PRIORITY,
-                AbsoluteExpiration = endOfCurrentWindow
+                AbsoluteExpiration = currentState.ExpireTimestamp
             };
 
             return cacheEntryOptions;

@@ -3,8 +3,14 @@ using DDOSGuardService.Models;
 
 namespace DDOSGuardService.Logic
 {
-    public abstract class RequestWindowCache() : ICache<RequestWindowState>
+    public abstract class RequestWindowCache(double timeFrameInSeconds) : ICache<RequestWindowState>
     {
+        #region Fields
+
+        protected readonly double _timeFrameInSeconds = timeFrameInSeconds;
+
+        #endregion
+
         #region Properties
 
         public virtual bool DoesExpire => false;
@@ -17,13 +23,13 @@ namespace DDOSGuardService.Logic
 
         public void CacheRequest(string clientId)
         {
-            var currentWindow = this[clientId];
-            this[clientId] = new RequestWindowState(currentWindow.StartTimestamp, currentWindow.Count + 1);
+            var (start, expire, count) = this[clientId];
+            this[clientId] = new RequestWindowState(start, expire, count + 1);
         }
 
         public void ResetWindow(string clientId, DateTime timestamp)
         {
-            this[clientId] = new RequestWindowState(timestamp);
+            this[clientId] = new RequestWindowState(timestamp, _timeFrameInSeconds);
         }
 
         #endregion

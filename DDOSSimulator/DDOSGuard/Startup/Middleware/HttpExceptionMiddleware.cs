@@ -1,5 +1,4 @@
 ﻿using DDOSGuardService.Exceptions;
-using Microsoft.AspNetCore.Mvc;
 
 namespace DDOSGuardService.Startup.Middleware
 {

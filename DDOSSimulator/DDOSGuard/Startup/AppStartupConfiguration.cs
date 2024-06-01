@@ -1,5 +1,4 @@
 ﻿using DDOSGuardService.Startup.Extensions;
-using DDOSGuardService.Startup.Middleware;
 
 namespace DDOSGuardService.Startup
 {

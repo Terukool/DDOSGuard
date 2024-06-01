@@ -57,8 +57,9 @@ namespace DDOSGuardService.Logic
             }
 
             var windowState = _cache[windowId];
+            var hasWindowExpired = newRequestTimestamp - windowState.StartTimestamp >= TimeSpan.FromSeconds(_timeFrameInSeconds);
 
-            return newRequestTimestamp - windowState.StartTimestamp >= TimeSpan.FromSeconds(_timeFrameInSeconds);
+            return hasWindowExpired;
         }
 
         #endregion
